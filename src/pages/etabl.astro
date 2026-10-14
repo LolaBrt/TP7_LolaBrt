@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "leaflet/dist/leaflet.css";
+---
+
+<Layout
+  title="Liste des établissements"
+  description="Liste des établissements de l'enseignement supérieur en France métropolitaine"
+>
+  <h1>Liste des établissements</h1>
+  <h2>Carte des établissements côté client</h2>
+  <p>Cette carte présente la localisation des établissements en France.</p>
+  <div id="map" style="height: 600px;"></div>
+</Layout>
+
+<script>
+  import L from "leaflet";
+  import listeEtablissements from "../data/listeEtablissements.json";
+
+  const map = L.map("map").setView([46.6033, 1.883], 6);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+
+  listeEtablissements.forEach((etablissement) => {
+    L.marker([etablissement.lat, etablissement.lon])
+      .addTo(map)
+      .bindPopup(etablissement.name);
+  });
+</script>

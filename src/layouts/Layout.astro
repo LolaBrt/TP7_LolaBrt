@@ -5,9 +5,10 @@ import "@fontsource/oi";
 
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import "leaflet/dist/leaflet.css";
 
 const { title, description } = Astro.props;
-const siteName = "Tp1_DevFront_LolaBrouart_A2";
+const siteName = "Tp7_DevFront_LolaBrouart_A2";
 const titleHead =
   Astro.url.pathname === "/" ? siteName : `${title} — ${siteName}`;
 ---

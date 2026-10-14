@@ -2,20 +2,32 @@
 import PlotFigure from "../components/PlotFigure.astro";
 import Layout from "../layouts/Layout.astro";
 import * as Plot from "@observablehq/plot";
-import penguins from "../assets/penguins.json";
+import penguins from "../data/penguins.json";
+import "leaflet/dist/leaflet.css";
 ---
 
-<Layout>
-  <h1 class="text-2xl">Test Astro et Plot (Observablehq)</h1>
-  <PlotFigure
-    options={{
-      marks: [
-        Plot.dot(penguins, {
-          x: "culmen_length_mm",
-          y: "culmen_depth_mm",
-          stroke: "species",
-        }),
-      ],
-    }}
-  />
+<Layout
+  title="Test Astro et Plot (Observablehq)"
+  description="Test Astro et Plot (Observablehq)"
+>
+  <h1>Test Astro et Plot (Observablehq)</h1>
+  <div class="mb-20">
+    <PlotFigure
+      options={{
+        title: "Longueur et profondeur du bec des manchots",
+        subtitle:
+          "Chaque point représente un manchot. La couleur indique son espèce.",
+        caption: "Les dimensions sont exprimées en millimètres.",
+        ariaLabel:
+          "Nuage de points comparant la longueur et la profondeur du bec des manchots selon leur espèce.",
+        marks: [
+          Plot.dot(penguins, {
+            x: "culmen_length_mm",
+            y: "culmen_depth_mm",
+            stroke: "species",
+          }),
+        ],
+      }}
+    />
+  </div>
 </Layout>

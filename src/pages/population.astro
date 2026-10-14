@@ -1,0 +1,149 @@
+---
+import Layout from "../layouts/Layout.astro";
+import * as Plot from "@observablehq/plot";
+import populationMain from "../data/populationMain.json";
+import departements from "../data/departements.geojson.json";
+
+const listePeriode = [
+  ...new Set(populationMain.map((d) => d.Période)),
+].reverse();
+
+const listeSexe = [...new Set(populationMain.map((d) => d.Sexe))];
+
+const listeAge = [...new Set(populationMain.map((d) => d["Âge"]))];
+---
+
+<Layout
+  title="Population par département"
+  description="Population des départements selon la période, le sexe et l'âge"
+>
+  <h1>Population par département</h1>
+
+  <div>
+    <label for="periode">Période</label>
+    <select id="periode">
+      {
+        listePeriode.map((periode, index) => (
+          <option value={periode} selected={index === 0}>
+            {periode}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div>
+    <label for="sexe">Sexe</label>
+    <select id="sexe">
+      {
+        listeSexe.map((sexe, index) => (
+          <option value={sexe} selected={index === 0}>
+            {sexe}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div>
+    <label for="age">Âge</label>
+    <select id="age">
+      {
+        listeAge.map((age, index) => (
+          <option value={age} selected={index === 0}>
+            {age}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div id="population-map"></div>
+</Layout>
+
+<script>
+  import * as Plot from "@observablehq/plot";
+  import populationMain from "../data/populationMain.json";
+  import departements from "../data/departements.geojson.json";
+
+  const elmYear = document.getElementById("periode");
+  const elmSex = document.getElementById("sexe");
+  const elmAge = document.getElementById("age");
+  const mapContainer = document.getElementById("population-map");
+
+  function renderMap() {
+    const selectedYear = Number(elmYear.value);
+    const selectedSex = elmSex.value;
+    const selectedAge = elmAge.value;
+
+    const plot = Plot.plot({
+        title: "Population par département",
+        subtitle: `Population en ${selectedYear} selon le sexe et l'âge sélectionnés`,
+        caption: "Les couleurs représentent les niveaux de population. Survolez un département pour consulter sa valeur.",
+        ariaLabel: `Carte de la population des départements français en ${selectedYear}, pour le sexe ${selectedSex} et la catégorie d'âge ${selectedAge}.`,
+
+      projection: {
+        type: "mercator",
+        domain: departements,
+      },
+
+      color: {
+        type: "quantile",
+        n: 8,
+        scheme: "Oranges",
+        label: "Population",
+        legend: true,
+      },
+
+      ariaLabel: `Population par département en ${selectedYear}, pour le sexe ${selectedSex} et la catégorie d'âge ${selectedAge}.`,
+
+      marks: [
+        Plot.geo(departements, {
+          fill: (departement) => {
+            const nomDepartement = departement.properties.nom;
+
+            const population = populationMain.find(
+              (ligne) =>
+                ligne.Géographie === nomDepartement &&
+                ligne.Période === selectedYear &&
+                ligne.Sexe === selectedSex &&
+                ligne["Âge"] === selectedAge,
+            );
+
+            return population ? population.Valeur : 0;
+          },
+
+          stroke: "#999",
+
+          title: (departement) => {
+            const nomDepartement = departement.properties.nom;
+
+            const population = populationMain.find(
+              (ligne) =>
+                ligne.Géographie === nomDepartement &&
+                ligne.Période === selectedYear &&
+                ligne.Sexe === selectedSex &&
+                ligne["Âge"] === selectedAge,
+            );
+
+            return `${nomDepartement} : ${
+              population ? population.Valeur : "Donnée indisponible"
+            }`;
+          },
+
+          tip: true,
+        }),
+
+        Plot.frame(),
+      ],
+    });
+
+    mapContainer.replaceChildren(plot);
+  }
+
+  renderMap();
+
+  elmYear.addEventListener("change", renderMap);
+  elmSex.addEventListener("change", renderMap);
+  elmAge.addEventListener("change", renderMap);
+</script>
